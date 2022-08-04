@@ -8,6 +8,13 @@ from .serializers import *
 from django_filters.rest_framework import DjangoFilterBackend
 
 
+class LeaderTableViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = LeaderTableSerializer
+    queryset = CustomUser.objects.all()
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_fields = ['group', 'username',  'first_name', 'last_name', 'number']
+
+
 class MyQuizListAPI(generics.ListAPIView):
     # permission_classes = [
     #     permissions.IsAuthenticated
@@ -35,14 +42,14 @@ class UserViewSet(mixins.CreateModelMixin,
                    mixins.ListModelMixin,
                    GenericViewSet):
     queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserListSerializer
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend,]
     filterset_fields = ['group', 'username', 'number', 'last_name']
 
 
 
-class GroupViewSet(mixins.CreateModelMixin,
+class GroupListViewSet(mixins.CreateModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.DestroyModelMixin,
                    mixins.UpdateModelMixin,
@@ -53,15 +60,13 @@ class GroupViewSet(mixins.CreateModelMixin,
     # permission_classes = [permissions.IsAuthenticated]
 
 
-
-# class GroupListViewSet(viewsets.ReadOnlyModelViewSet):
-#     queryset = Group.objects.all()
-#     serializer_class = GroupSerializer
-
-
-# class QuizListView(viewsets.ReadOnlyModelViewSet):
-#     queryset = Quiz.objects.all()
-#     serializer_class = QuizListSerializer
+class QuizViewSet(mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   GenericViewSet):
+    queryset = Quiz.objects.all()
+    serializer_class = QuizSerializer
+    # permission_classes = [permissions.IsAuthenticated]
 
 
 class QuizListView(generics.ListAPIView):
@@ -81,29 +86,10 @@ class QuizListView(generics.ListAPIView):
 
 class QuizDetailAPI(generics.RetrieveAPIView):
     serializer_class = QuizDetailSerializer
-    # permission_classes = [
-    #     permissions.IsAuthenticated
-    # ]
+    permission_classes = [
+        permissions.IsAuthenticated
+    ]
     queryset = Group.objects.all()
-
-
-
-    # def get(self, *args, **kwargs):
-    #     slug = self.kwargs["slug"]
-    #     quiz = get_object_or_404(Quiz, slug=slug)
-    #     last_question = None
-    #     obj, created = QuizTaker.objects.get_or_create(user=self.request.user, quiz=quiz)
-    #     if created:
-    #         for question in Question.objects.filter(quiz=quiz):
-    #             UserAnswer.objects.create(quiz_taker=obj, question=question)
-    #     else:
-    #         last_question = UserAnswer.objects.filter(quiz_taker=obj, answer__isnull=False)
-    #         if last_question.count() > 0:
-    #             last_question = last_question.last().question.id
-    #         else:
-    #             last_question = None
-    #
-    #     return Response({'quiz': self.get_serializer(quiz, context={'request': self.request}).data, 'last_question_id': last_question})
 
 
 
@@ -114,47 +100,14 @@ class SaveUsersAnswer(generics.CreateAPIView):
 
 
 
-# class SubmitQuizAPI(generics.GenericAPIView):
-#     serializer_class = QuizResultSerializer
-#     queryset = UserAnswer.objects.all()
-#     # permission_classes = [
-#     #     permissions.IsAuthenticated
-#     # ]
-#
-#     def post(self, request, *args, **kwargs):
-#         quiztaker_id = request.data['quiztaker']
-#         question_id = request.data['question']
-#         answer_id = request.data['answer']
-#
-#         quiztaker = get_object_or_404(QuizTaker, id=quiztaker_id)
-#         question = get_object_or_404(Question, id=question_id)
-#
-#         quiz = Quiz.objects.get(slug=self.kwargs['slug'])
-#
-#         if quiztaker.completed:
-#             return Response({
-#                 "message": "This quiz is already complete. You can't submit again"},
-#                 status=status.HTTP_412_PRECONDITION_FAILED
-#             )
-#
-#         if answer_id is not None:
-#             answer = get_object_or_404(Answer, id=answer_id)
-#             obj = get_object_or_404(UserAnswer, quiz_taker=quiztaker, question=question)
-#             obj.answer = answer
-#             obj.save()
-#
-#         quiztaker.completed = True
-#         correct_answers = 0
-#
-#         for users_answer in UserAnswer.objects.filter(quiz_taker=quiztaker):
-#             answer = Answer.objects.get(question=users_answer.question, is_correct=True)
-#             print(answer)
-#             print(users_answer.answer)
-#             if users_answer.answer == answer:
-#                 correct_answers += 1
-#
-#         quiztaker.score = int(correct_answers / quiztaker.quiz.question_set.count() * 100)
-#         print(quiztaker.score)
-#         quiztaker.save()
-#
-#         return Response(self.get_serializer(quiz).data)
+
+# class RegisterApi(generics.GenericAPIView):
+#     serializer_class = RegisterSerializer
+#     def post(self, request, *args,  **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.save()
+#         return Response({
+#             "user": UserSerializer(user,    context=self.get_serializer_context()).data,
+#             "message": "User Created Successfully.  Now perform Login to get your token",
+#         })

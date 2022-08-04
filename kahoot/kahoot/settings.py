@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'kahpril',
     'rest_framework',
     'djoser',
-    'rest_framework.authtoken',
     'corsheaders',
     'drf_yasg',
     'django_filters',
@@ -50,7 +49,7 @@ INSTALLED_APPS = [
     'nested_inline',
 
 ]
-
+# 'rest_framework.authtoken',
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -151,18 +150,6 @@ REST_FRAMEWORK = {
 
 
 
-
-
-DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': '#activate/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': True,
-    'SERIALIZERS': {},
-}
-
-
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=60),
@@ -196,11 +183,11 @@ SIMPLE_JWT = {
 }
 
 
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'myrzaiymkdrmtva@gmail.com'
-EMAIL_HOST_PASSWORD = 'toktorovamm12'
-EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST_USER = 'myrzaiymkdrmtva@gmail.com'
+# EMAIL_HOST_PASSWORD = 'toktorovamm12'
+# EMAIL_PORT = 587
 
 
 
@@ -225,5 +212,14 @@ PHONENUMBER_DEFAULT_REGION = "KG"
 
 # AUTH_USER_MODEL = 'users.User'
 
+# AUTHENTICATION_BACKENDS = (
+#     ('django.contrib.auth.backends.ModelBackend'),
+# )
+# AUTH_USER_MODEL = "kahpril.User"
 
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "api_key": {"type": "apiKey", "in": "header", "name": "Authorization"}
+    },
+}
 

@@ -1,7 +1,15 @@
 from .models import Quiz, QuizTaker, CustomUser, Group, Answer, Question, UserAnswer
-from django.conf import settings
 from rest_framework import serializers
-from django.shortcuts import get_object_or_404
+from djoser.serializers import UserSerializer
+
+
+
+class LeaderTableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'first_name', 'last_name', 'group', 'number', 'email', 'all_score',
+                  'rating', 'tests',
+                  'is_active']
 
 
 class MyQuizListSerializer(serializers.ModelSerializer):
@@ -12,7 +20,7 @@ class MyQuizListSerializer(serializers.ModelSerializer):
     """h"""
     class Meta:
         model = Quiz
-        fields = ["quiz_id", "name", "description", "image", "slug", "questions_count", "completed", "score", "progress"]
+        fields = ["id", "name", "description", "image", "slug", "questions_count", "completed", "score", "progress"]
         # read_only_fields = ["questions_count", "completed", "progress"]
     """test"""
     def get_completed(self, obj):
@@ -35,49 +43,42 @@ class MyQuizListSerializer(serializers.ModelSerializer):
             return quiztaker.score
 
 
-class QuizListSerializer(serializers.ModelSerializer):
-    questions_count = serializers.SerializerMethodField()
-
-    # id_count = serializers.SerializerMethodField()
+class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = ['id', 'name', 'questions_count']
-        read_only_fields = ['questions_count']
-        # user_count = serializers.IntegerField(
-        #     source='user_set.count',
-        #     read_only=True
-        # )
-
-    def get_questions_count(self, obj):
-        return obj.question_set.all().count()
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['username', 'first_name', 'last_name', 'group', 'number', 'email', 'password',  'number', 'all_score', 'rating', 'tests',
-                  'is_active', 'date_joined']
-
-        def create(self, validated_data):
-            user = CustomUser(
-                email=validated_data['email'],
-                username=validated_data['username']
-            )
-            user.set_password(validated_data['password'])
-            user.save()
-            return user
-
-
-class GroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Group
-        fields = ['name']
+        fields = ['id', 'name', 'description', 'image', 'player_passed', 'group', 'questions_count']
 
 
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ['id', 'question', 'label']
+
+
+
+class QuizListSerializer(serializers.ModelSerializer):
+    questions_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Quiz
+        fields = ['id', 'name', 'questions_count']
+        read_only_fields = ['questions_count']
+
+    def get_questions_count(self, obj):
+        return obj.question_set.all().count()
+
+
+class UserListSerializer(UserSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'first_name', 'last_name', 'group', 'number', 'email', 'password', 'all_score', 'rating', 'tests',
+                  'is_active', 'date_joined']
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['id', 'name']
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -98,10 +99,6 @@ class UsersAnswerSerializer(serializers.ModelSerializer):
         return UserAnswer.objects.create(**validated_data)
 
 
-# class QuizListSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Quiz
-#         fields = ['id', 'name', 'description', 'image']
 
 
 class QuizTakerSerializer(serializers.ModelSerializer):
@@ -128,19 +125,22 @@ class QuizDetailSerializer(serializers.ModelSerializer):
         except QuizTaker.DoesNotExist:
             return None
 
-# class QuizResultSerializer(serializers.ModelSerializer):
-#     quiztaker_set = serializers.SerializerMethodField()
-#     question_set = QuestionSerializer(many=True)
-#
+
+
+# class RegisterSerializer(serializers.ModelSerializer):
 #     class Meta:
-#         model = Quiz
-#         fields = "__all__"
+#         model = CustomUser
+#         fields = ('username', 'first_name', 'last_name', 'group', 'number', 'email', 'password', 'all_score', 'rating', 'tests',)
+#         extra_kwargs = {
+#             'password': {'write_only': True},
+#         }
+#         def create(self, validated_data):
+#             user = CustomUser.objects.create_user(validated_data['username'],
+#                                                   password=validated_data['password'],
+#                                                   first_name=validated_data['first_name'],
+#                                                   last_name=validated_data['last_name']
+#                                                   )
+#             return user
 #
-#     def get_quiztaker_set(self, obj):
-#         try:
-#             quiztaker = QuizTaker.objects.get(user=self.context['request'].user, quiz=obj)
-#             serializer = QuizTakerSerializer(quiztaker)
-#             return serializer.data
 #
-#         except QuizTaker.DoesNotExist:
-#             return None
+#

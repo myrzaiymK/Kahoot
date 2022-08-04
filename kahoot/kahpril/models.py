@@ -7,29 +7,28 @@ from django.template.defaultfilters import slugify
 
 
 class CustomUser(AbstractUser):
-    number = PhoneNumberField(null=True, )
+    number = PhoneNumberField(null=True, blank=True)
     all_score = models.FloatField(blank=True, null=True, default=0)
-    rating = models.PositiveIntegerField(null=True)
-    tests = models.PositiveIntegerField(default=0)
+    group_rating = models.PositiveIntegerField(null=True, blank=True)
+    rating = models.PositiveIntegerField(null=True, blank=True, default=0)
+    tests = models.PositiveIntegerField(default=0, blank=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, )
 
     def save(self, *args, **kwargs):
-        question = QuizTaker.objects.all().filter()
-        score = sum([i.score for i in question])
+        all_score = QuizTaker.objects.all().filter(user=self)
+        score = sum([i.score for i in all_score])
         self.all_score = score
-        super().save()
-        #
-        # question = QuizTaker.objects.all().filter()
-        # # score = sum([i.score for i in question])
-        # self.all_score = question.score
-        # # self.score.save()
-        # super().save()
 
-
-
-    # def save(self, *args, **kwargs):
         rating = self.all_score / 10
         self.rating = rating
+
+        group_rating = CustomUser.objects.filter(group=self.group)
+        score = sum([i.all_score for i in group_rating])
+        self.group_rating = score /10
+
+        if self.tests >= 0:
+            self.tests = QuizTaker.objects.all().filter(user=self).count()
+
         super().save()
 
     class Meta:
@@ -43,14 +42,22 @@ class Quiz(models.Model):
     image = models.ImageField(upload_to='new/%Y/%m/%d')
     slug = models.SlugField(blank=True)
     roll_out = models.BooleanField(default=False)
+    player_passed = models.IntegerField(default=0, blank=True, null=True)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    questions_count = models.IntegerField(default=0, blank=True, null=True)
+
 
     class Meta:
         ordering = ['timestamp', ]
         verbose_name_plural = 'Quizzes'
 
-    def __str__(self):
-        return self.name
+    def save(self, *args, **kwargs):
+        if self.questions_count >= 0:
+            self.questions_count = Question.objects.all().count()
+        if self.player_passed >= 0:
+            self.player_passed = QuizTaker.objects.all().filter(quiz_id=self.id).count()
+        super(Quiz, self).save()
 
 
 class Question(models.Model):
@@ -110,8 +117,8 @@ class QuizTaker(models.Model):
     #     super().save(*args, **kwargs)
 
 
-    def __str__(self):
-        return self.user.username
+    # def __str__(self):
+    #     return self.user.username
 
 
 class UserAnswer(models.Model):
@@ -138,7 +145,7 @@ class UserAnswer(models.Model):
 
 
     def __str__(self):
-        return f'{self.quiz_taker.user} : {self.score}'
+        return f'{self.quiz_taker.user}   _  :  _    {self.score}   _   :   _     {self.quiz}   _   :   _    {self.question}   _   :    _   {self.answer}'
 
 
 

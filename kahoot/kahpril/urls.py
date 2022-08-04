@@ -7,22 +7,21 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
-router.register(r'groups', GroupViewSet)
-
-
+router.register(r'groups', GroupListViewSet)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
     path('my-quizzes', MyQuizListAPI.as_view()),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    # path('api/register', RegisterApi.as_view()),
     path('quizzes/', QuizListView.as_view()),
+    path('quiz_list/create/', QuizViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('quiz_list/<int:pk>/delete/', QuizViewSet.as_view({'delete': 'destroy'})),
     path("save-answer", SaveUsersAnswer.as_view()),
+    path('leader_table', LeaderTableViewSet.as_view({'get': 'list'})),
     re_path(r"quizzes/(?P<group>[\w\-]+)/$", QuizDetailAPI.as_view()),
-    # re_path(r"quizzes/(?P<slug>[\w\-]+)/submit/$", SubmitQuizAPI.as_view()),
-
-    # re_path('quizzes/(?P<slug>[\w\-]/$', QuizDetailView.as_view()),
-
-
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
 urlpatterns += router.urls
 
