@@ -1,8 +1,6 @@
 from .views import *
 from django.urls import include, path, re_path
 from rest_framework import routers
-# from rest_framework
-
 
 
 router = routers.DefaultRouter()
@@ -14,7 +12,6 @@ urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('my-quizzes', MyQuizListAPI.as_view()),
-    # path('api/register', RegisterApi.as_view()),
     path('quizzes/', QuizListView.as_view()),
     path('quiz_list/create/', QuizViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('quiz_list/<int:pk>/delete/', QuizViewSet.as_view({'delete': 'destroy'})),
@@ -24,5 +21,4 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
 urlpatterns += router.urls
-
 

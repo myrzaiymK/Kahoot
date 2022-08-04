@@ -14,12 +14,6 @@ class QuestionInline(NestedStackedInline):
 	inlines = [AnswerInline, ]
 	extra = 5
 
-#
-# class Quiz1(admin.ModelAdmin):
-# 	model = Quiz
-# 	fields = ('name', 'description', 'image', 'slug', 'roll_out', 'player_passed', 'group', 'timestamp', 'questions_count')
-# 	# list_display = ('username', 'group', 'email', 'all_score', 'group_rating', 'rating', 'tests', 'is_active')
-
 
 class QuizAdmin(NestedModelAdmin):
 	inlines = [QuestionInline, ]
@@ -39,6 +33,8 @@ class UserAdmin(admin.ModelAdmin):
 	model = CustomUser
 	fields = ('username', 'first_name', 'last_name', 'group', 'email', 'number', 'password', 'all_score', 'group_rating', 'rating', 'tests', 'is_active')
 	list_display = ('username', 'group', 'email', 'all_score', 'group_rating', 'rating', 'tests', 'is_active')
+	list_filter = ('group',)
+	search_fields = ('username', 'first_name', 'last_name', 'number')
 
 
 admin.site.register(Quiz, QuizAdmin)

@@ -24,7 +24,7 @@ class CustomUser(AbstractUser):
 
         group_rating = CustomUser.objects.filter(group=self.group)
         score = sum([i.all_score for i in group_rating])
-        self.group_rating = score /10
+        self.group_rating = score / 10
 
         if self.tests >= 0:
             self.tests = QuizTaker.objects.all().filter(user=self).count()
@@ -36,17 +36,15 @@ class CustomUser(AbstractUser):
 
 
 class Quiz(models.Model):
-    # quiz_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=1000)
     description = models.CharField(max_length=1000)
-    image = models.ImageField(upload_to='new/%Y/%m/%d')
+    image = models.ImageField(upload_to='new/%Y/%m/%d', null=True)
     slug = models.SlugField(blank=True)
     roll_out = models.BooleanField(default=False)
     player_passed = models.IntegerField(default=0, blank=True, null=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     questions_count = models.IntegerField(default=0, blank=True, null=True)
-
 
     class Meta:
         ordering = ['timestamp', ]
@@ -73,7 +71,6 @@ class Question(models.Model):
         return self.answer_set.get(is_correct=True)
 
 
-
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answer_set')
     label = models.CharField(max_length=1000)
@@ -81,7 +78,6 @@ class Answer(models.Model):
 
     def __str__(self):
         return self.label
-
 
 
 class QuizTaker(models.Model):
@@ -92,33 +88,12 @@ class QuizTaker(models.Model):
     date_finished = models.DateTimeField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    # def save(self, *args, **kwargs):
-    #     user_score = UserAnswer.objects.all().filter(quiz_taker=self)
-    #     for i in user_score:
-    #         score = sum([i.score])
-    #         self.score = score
-    #         # self.score.save()
-    #     super().save()
-
     def save(self, *args, **kwargs):
         question = UserAnswer.objects.all().filter(quiz_taker=self)
         UserAnswer.score = sum([i.score for i in question])
         self.score = UserAnswer.score
         # self.score.save()
         super().save(*args, **kwargs)
-
-
-    # def save(self, *args, **kwargs):
-    #     question = UserAnswer.objects.all().filter(quiz_taker=self)
-    #     self.score = sum([i.score for i in question])
-    #
-    #     self.user.total_score = self.score
-    #     self.user.save()
-    #     super().save(*args, **kwargs)
-
-
-    # def __str__(self):
-    #     return self.user.username
 
 
 class UserAnswer(models.Model):
@@ -129,12 +104,12 @@ class UserAnswer(models.Model):
     time = models.PositiveIntegerField()
     score = models.IntegerField(default=0)
 
-    def save(self,  *args, **kwargs):
-        quest = Question.objects.get(pk = self.question_id)
+    def save(self, *args, **kwargs):
+        quest = Question.objects.get(pk=self.question_id)
         quiz = Quiz.objects.get(pk=self.quiz_id)
         user_answer = quest.answer_set.get(label=self.answer)
         if quest.get_correct_answer().label == user_answer.label:
-        # if str(self.answer) == str(self.answer.label):
+            # if str(self.answer) == str(self.answer.label):
             if self.time == 1:
                 self.score = (100 - (100 / int(self.question.timer) * int(self.time)) + 100 / int(self.question.timer))
             elif self.time > 1:
@@ -143,15 +118,10 @@ class UserAnswer(models.Model):
                 self.score = 0
         super().save()
 
-
     def __str__(self):
         return f'{self.quiz_taker.user}   _  :  _    {self.score}   _   :   _     {self.quiz}   _   :   _    {self.question}   _   :    _   {self.answer}'
-
 
 
 @receiver(pre_save, sender=Quiz)
 def slugify_name(sender, instance, *args, **kwargs):
     instance.slug = slugify(instance.name)
-
-
-

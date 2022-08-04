@@ -94,11 +94,6 @@ class UsersAnswerSerializer(serializers.ModelSerializer):
         model = UserAnswer
         fields = '__all__'
 
-    def create(self, validated_data):
-        print(Question.objects.get(validated_data['timer']))
-        return UserAnswer.objects.create(**validated_data)
-
-
 
 
 class QuizTakerSerializer(serializers.ModelSerializer):
@@ -127,20 +122,3 @@ class QuizDetailSerializer(serializers.ModelSerializer):
 
 
 
-# class RegisterSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = CustomUser
-#         fields = ('username', 'first_name', 'last_name', 'group', 'number', 'email', 'password', 'all_score', 'rating', 'tests',)
-#         extra_kwargs = {
-#             'password': {'write_only': True},
-#         }
-#         def create(self, validated_data):
-#             user = CustomUser.objects.create_user(validated_data['username'],
-#                                                   password=validated_data['password'],
-#                                                   first_name=validated_data['first_name'],
-#                                                   last_name=validated_data['last_name']
-#                                                   )
-#             return user
-#
-#
-#
